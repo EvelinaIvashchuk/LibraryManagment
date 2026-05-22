@@ -1,0 +1,74 @@
+@model BookFormDto
+@{ ViewData["Title"] = "Додати книгу"; }
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-book-medical me-2 text-primary"></i>Нова книга</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger small py-2"></div>
+                    }
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Title" class="form-label fw-semibold"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Введіть назву книги" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-8">
+                            <label asp-for="Author" class="form-label fw-semibold"></label>
+                            <input asp-for="Author" class="form-control" placeholder="Прізвище Ім'я" />
+                            <span asp-validation-for="Author" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Year" class="form-label fw-semibold"></label>
+                            <input asp-for="Year" class="form-control" type="number" />
+                            <span asp-validation-for="Year" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Genre" class="form-label fw-semibold"></label>
+                            <input asp-for="Genre" class="form-control" placeholder="Роман, Поезія..." list="genres-list" />
+                            <datalist id="genres-list">
+                                <option value="Роман" />
+                                <option value="Повість" />
+                                <option value="Поезія" />
+                                <option value="Фентезі" />
+                                <option value="Наукова фантастика" />
+                                <option value="Антиутопія" />
+                                <option value="Детектив" />
+                                <option value="Казка" />
+                                <option value="Технічна" />
+                                <option value="Магічний реалізм" />
+                            </datalist>
+                            <span asp-validation-for="Genre" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="TotalCopies" class="form-label fw-semibold"></label>
+                            <input asp-for="TotalCopies" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="TotalCopies" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="ISBN" class="form-label fw-semibold"></label>
+                            <input asp-for="ISBN" class="form-control font-monospace" placeholder="978-..." />
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-floppy-disk me-2"></i>Зберегти
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Скасувати</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { @await Html.PartialAsync("_ValidationScriptsPartial") }

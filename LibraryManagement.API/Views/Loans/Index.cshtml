@@ -1,0 +1,85 @@
+@model IEnumerable<LoanViewModel>
+@{ ViewData["Title"] = "Активні видачі"; }
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Активні видачі</span>
+        <a asp-action="Create" class="btn btn-sm btn-primary">
+            <i class="fas fa-plus me-1"></i>Видати книгу
+        </a>
+    </div>
+
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-2x mb-3 opacity-50"></i>
+                <p>Активних видач немає</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Книга</th>
+                            <th>Читач</th>
+                            <th>Видано</th>
+                            <th>Термін</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loan in Model)
+                        {
+                            <tr class="@(loan.IsOverdue ? "table-warning" : "")">
+                                <td class="text-muted small">@loan.Id</td>
+                                <td>
+                                    <div class="fw-medium">@loan.BookTitle</div>
+                                    <div class="text-muted small">@loan.BookAuthor</div>
+                                </td>
+                                <td>
+                                    <a asp-controller="Readers" asp-action="Details" asp-route-id="@loan.ReaderId"
+                                       class="text-decoration-none">@loan.ReaderName</a>
+                                </td>
+                                <td class="text-muted small">@loan.IssuedAt.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                                <td class="@(loan.IsOverdue ? "text-danger fw-semibold" : "")">
+                                    @loan.DueDate.ToLocalTime().ToString("dd.MM.yyyy")
+                                    @if (loan.IsOverdue)
+                                    {
+                                        <div class="small">+@loan.DaysOverdue дн.</div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (loan.IsOverdue)
+                                    {
+                                        <span class="badge badge-overdue">Прострочено</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-active">Активна</span>
+                                    }
+                                </td>
+                                <td>
+                                    <form asp-action="Return" asp-route-id="@loan.Id" method="post"
+                                          onsubmit="return confirm('Підтвердити повернення книги?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Прийняти книгу">
+                                            <i class="fas fa-rotate-left me-1"></i>Повернути
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+    <div class="card-footer bg-white text-muted small">
+        Активних видач: @Model.Count()
+    </div>
+</div>

@@ -1,0 +1,138 @@
+@model DashboardViewModel
+@{ ViewData["Title"] = "Дашборд"; }
+
+<!-- Статистика -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card primary p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Книг у каталозі</div>
+                    <div class="fs-2 fw-bold">@Model.TotalBooks</div>
+                </div>
+                <i class="fas fa-book fa-2x text-primary opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card success p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Читачів</div>
+                    <div class="fs-2 fw-bold">@Model.TotalReaders</div>
+                </div>
+                <i class="fas fa-users fa-2x text-success opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card warning p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Активних видач</div>
+                    <div class="fs-2 fw-bold">@Model.ActiveLoans</div>
+                    @if (Model.OverdueLoans > 0)
+                    {
+                        <span class="badge bg-danger">@Model.OverdueLoans прострочено</span>
+                    }
+                </div>
+                <i class="fas fa-hand-holding-heart fa-2x text-warning opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card danger p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Несплачені штрафи</div>
+                    <div class="fs-2 fw-bold">@Model.UnpaidFines.ToString("F2") грн</div>
+                </div>
+                <i class="fas fa-file-invoice-dollar fa-2x text-danger opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Швидкі дії -->
+@if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+{
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <div class="card p-3">
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="Loans" asp-action="Create" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Видати книгу
+                    </a>
+                    <a asp-controller="Books" asp-action="Create" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-book-medical me-1"></i>Додати книгу
+                    </a>
+                    <a asp-controller="Loans" asp-action="Overdue" class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-clock-rotate-left me-1"></i>Прострочені (@Model.OverdueLoans)
+                    </a>
+                    <a asp-controller="Fines" asp-action="Index" class="btn btn-outline-warning btn-sm">
+                        <i class="fas fa-receipt me-1"></i>Штрафи до сплати
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Останні видачі -->
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Останні активні видачі</span>
+        @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+        {
+            <a asp-controller="Loans" asp-action="Index" class="btn btn-sm btn-outline-secondary">Всі видачі</a>
+        }
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.RecentLoans.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-inbox fa-2x mb-3 opacity-50"></i>
+                <p>Активних видач немає</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Книга</th>
+                            <th>Читач</th>
+                            <th>Видано</th>
+                            <th>До</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loan in Model.RecentLoans)
+                        {
+                            <tr>
+                                <td class="fw-medium">@loan.BookTitle</td>
+                                <td>@loan.ReaderName</td>
+                                <td class="text-muted small">@loan.IssuedAt.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                                <td class="@(loan.IsOverdue ? "text-danger fw-semibold" : "")">
+                                    @loan.DueDate.ToLocalTime().ToString("dd.MM.yyyy")
+                                </td>
+                                <td>
+                                    @if (loan.IsOverdue)
+                                    {
+                                        <span class="badge badge-overdue">Прострочено @loan.DaysOverdue д.</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-active">Активна</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

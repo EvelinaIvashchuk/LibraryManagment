@@ -1,0 +1,61 @@
+@model IEnumerable<LoanViewModel>
+@{ ViewData["Title"] = "Прострочені видачі"; }
+
+<div class="card border-danger">
+    <div class="card-header bg-danger bg-opacity-10 border-danger">
+        <span class="fw-semibold text-danger">
+            <i class="fas fa-clock-rotate-left me-2"></i>Прострочені видачі (@Model.Count())
+        </span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-circle-check fa-2x mb-3 text-success opacity-75"></i>
+                <p>Прострочених видач немає</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Книга</th>
+                            <th>Читач</th>
+                            <th>Термін</th>
+                            <th class="text-danger">Прострочено</th>
+                            <th>Штраф (5 грн/день)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loan in Model)
+                        {
+                            <tr>
+                                <td class="fw-medium">@loan.BookTitle</td>
+                                <td>
+                                    <a asp-controller="Readers" asp-action="Details" asp-route-id="@loan.ReaderId"
+                                       class="text-decoration-none">@loan.ReaderName</a>
+                                    <div class="text-muted small">@loan.ReaderEmail</div>
+                                </td>
+                                <td class="text-danger">@loan.DueDate.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                                <td class="text-danger fw-semibold">@loan.DaysOverdue дн.</td>
+                                <td class="fw-semibold">@((loan.DaysOverdue * 5).ToString("F2")) грн</td>
+                                <td>
+                                    <form asp-action="Return" asp-route-id="@loan.Id" method="post"
+                                          onsubmit="return confirm('Прийняти книгу та нарахувати штраф?')">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-warning">
+                                            <i class="fas fa-rotate-left me-1"></i>Повернути + штраф
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

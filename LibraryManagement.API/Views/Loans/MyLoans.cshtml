@@ -1,0 +1,86 @@
+@model IEnumerable<LoanViewModel>
+@{ ViewData["Title"] = "Мої видачі"; }
+
+@if (Model.Any(l => l.IsOverdue))
+{
+    <div class="alert alert-danger mb-4">
+        <i class="fas fa-triangle-exclamation me-2"></i>
+        У вас є прострочені видачі. Зверніться до бібліотеки.
+    </div>
+}
+
+<div class="card">
+    <div class="card-header bg-white">
+        <span class="fw-semibold">Мої книги</span>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-book-open fa-2x mb-3 opacity-50"></i>
+                <p>У вас немає активних видач</p>
+                <a asp-controller="Books" asp-action="Index" class="btn btn-outline-primary btn-sm">
+                    Переглянути каталог
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Книга</th>
+                            <th>Автор</th>
+                            <th>Видано</th>
+                            <th>Повернути до</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loan in Model)
+                        {
+                            <tr class="@(loan.IsOverdue ? "table-danger" : "")">
+                                <td class="fw-medium">@loan.BookTitle</td>
+                                <td class="text-muted">@loan.BookAuthor</td>
+                                <td class="text-muted small">@loan.IssuedAt.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                                <td class="@(loan.IsOverdue ? "text-danger fw-bold" : loan.Status == LoanStatus.Active ? "" : "text-muted")">
+                                    @if (loan.ReturnedAt.HasValue)
+                                    {
+                                        @loan.ReturnedAt.Value.ToLocalTime().ToString("dd.MM.yyyy")
+                                    }
+                                    else
+                                    {
+                                        @loan.DueDate.ToLocalTime().ToString("dd.MM.yyyy")
+                                        @if (loan.IsOverdue)
+                                        {
+                                            <span class="ms-1 small">(+@loan.DaysOverdue дн.)</span>
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @switch (loan.Status)
+                                    {
+                                        case LoanStatus.Active when loan.IsOverdue:
+                                            <span class="badge badge-overdue">Прострочено</span>
+                                            break;
+                                        case LoanStatus.Active:
+                                            <span class="badge badge-active">Активна</span>
+                                            break;
+                                        case LoanStatus.Returned:
+                                            <span class="badge badge-returned">Повернено</span>
+                                            break;
+                                    }
+                                    @if (loan.HasFine)
+                                    {
+                                        <span class="badge bg-danger ms-1">Штраф</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

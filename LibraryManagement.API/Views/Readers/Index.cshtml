@@ -1,0 +1,76 @@
+@model IEnumerable<ReaderViewModel>
+@{ ViewData["Title"] = "Читачі"; }
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control form-control-sm" placeholder="Пошук за ім'ям або email..." style="width:280px;" />
+            <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-search me-1"></i>Знайти</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <a asp-action="Index" class="btn btn-sm btn-outline-danger"><i class="fas fa-xmark"></i></a>
+            }
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ім'я</th>
+                        <th>Email</th>
+                        <th>Телефон</th>
+                        <th>Зареєстровано</th>
+                        <th class="text-center">Видачі</th>
+                        <th class="text-center">Штрафи</th>
+                        <th class="text-center">Статус</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reader in Model)
+                    {
+                        <tr class="@(reader.IsBlocked ? "table-danger opacity-75" : "")">
+                            <td class="fw-medium">@reader.FullName</td>
+                            <td class="text-muted small">@reader.Email</td>
+                            <td class="text-muted small">@(reader.Phone ?? "—")</td>
+                            <td class="text-muted small">@reader.RegisteredAt.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                            <td class="text-center">
+                                <span class="badge bg-primary-subtle text-primary">@reader.ActiveLoans</span>
+                            </td>
+                            <td class="text-center">
+                                @if (reader.UnpaidFines > 0)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">@reader.UnpaidFines.ToString("F2") грн</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (reader.IsBlocked)
+                                {
+                                    <span class="badge bg-danger">Заблоковано</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-subtle text-success">Активний</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@reader.Id" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white text-muted small">
+        Усього читачів: @Model.Count()
+    </div>
+</div>

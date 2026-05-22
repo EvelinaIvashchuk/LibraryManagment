@@ -1,0 +1,61 @@
+@model BookViewModel
+@{ ViewData["Title"] = Model.Title; }
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-book me-2 text-primary"></i>Картка книги</h5>
+                <div class="d-flex gap-2">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-pen me-1"></i>Редагувати
+                        </a>
+                    }
+                    <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Назад</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Назва</dt>
+                    <dd class="col-sm-8 fw-semibold fs-5">@Model.Title</dd>
+
+                    <dt class="col-sm-4 text-muted">Автор</dt>
+                    <dd class="col-sm-8">@Model.Author</dd>
+
+                    <dt class="col-sm-4 text-muted">Жанр</dt>
+                    <dd class="col-sm-8"><span class="badge bg-secondary-subtle text-secondary">@Model.Genre</span></dd>
+
+                    <dt class="col-sm-4 text-muted">Рік видання</dt>
+                    <dd class="col-sm-8">@Model.Year</dd>
+
+                    <dt class="col-sm-4 text-muted">ISBN</dt>
+                    <dd class="col-sm-8 font-monospace">@(string.IsNullOrEmpty(Model.ISBN) ? "—" : Model.ISBN)</dd>
+
+                    <dt class="col-sm-4 text-muted">Примірники</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.IsAvailable)
+                        {
+                            <span class="badge bg-success">@Model.AvailableCopies доступно</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Немає в наявності</span>
+                        }
+                        <span class="text-muted small ms-1">з @Model.TotalCopies примірників</span>
+                    </dd>
+                </dl>
+            </div>
+            @if ((User.IsInRole("Admin") || User.IsInRole("Librarian")) && Model.IsAvailable)
+            {
+                <div class="card-footer bg-white">
+                    <a asp-controller="Loans" asp-action="Create"
+                       class="btn btn-sm btn-success">
+                        <i class="fas fa-hand-holding-heart me-1"></i>Видати цю книгу
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

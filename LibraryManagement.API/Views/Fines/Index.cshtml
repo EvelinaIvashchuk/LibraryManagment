@@ -1,0 +1,66 @@
+@model IEnumerable<FineViewModel>
+@{ ViewData["Title"] = "Несплачені штрафи"; }
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Несплачені штрафи</span>
+        <a asp-action="All" class="btn btn-sm btn-outline-secondary">Всі штрафи</a>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-circle-check fa-2x mb-3 text-success opacity-75"></i>
+                <p>Несплачених штрафів немає</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Читач</th>
+                            <th>Книга</th>
+                            <th>Причина</th>
+                            <th>Сума</th>
+                            <th>Нараховано</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var fine in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Readers" asp-action="Details" asp-route-id="@fine.ReaderId"
+                                       class="text-decoration-none fw-medium">@fine.ReaderName</a>
+                                </td>
+                                <td class="text-muted small">@fine.BookTitle</td>
+                                <td class="text-muted small">@fine.Reason</td>
+                                <td class="fw-bold text-danger">@fine.Amount.ToString("F2") грн</td>
+                                <td class="text-muted small">@fine.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy")</td>
+                                <td>
+                                    <form asp-action="Pay" asp-route-id="@fine.Id" method="post"
+                                          onsubmit="return confirm('Відмітити штраф як сплачений?')">
+                                        @Html.AntiForgeryToken()
+                                        <button class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-check me-1"></i>Сплачено
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+    @if (Model.Any())
+    {
+        <div class="card-footer bg-white">
+            <span class="text-muted small">Загалом до сплати:</span>
+            <span class="fw-bold text-danger ms-2">@Model.Sum(f => f.Amount).ToString("F2") грн</span>
+        </div>
+    }
+</div>
