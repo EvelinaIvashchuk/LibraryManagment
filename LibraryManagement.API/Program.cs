@@ -14,13 +14,6 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
-    await db.Database.MigrateAsync();
-    await DataSeeder.SeedAsync(scope.ServiceProvider);
-}
-
 // Healthcheck для Railway
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
@@ -34,4 +27,14 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.Run();
+// Спочатку запускаємо сервер, потім міграції — Railway вже бачить /health
+await app.StartAsync();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
+    await db.Database.MigrateAsync();
+    await DataSeeder.SeedAsync(scope.ServiceProvider);
+}
+
+await app.WaitForShutdownAsync();

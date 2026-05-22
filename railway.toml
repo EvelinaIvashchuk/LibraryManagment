@@ -4,6 +4,6 @@ dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "dotnet LibraryManagement.API.dll"
-healthcheckPath = "/"
+healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
